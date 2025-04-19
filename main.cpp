@@ -21,12 +21,14 @@ int main() {
     }
 
     cv::CascadeClassifier face_cascade;
-    std::string cascade_path = "C:/Users/Anton/vcpkg/buildtrees/opencv4/src/4.11.0-46ecfbc8ae.clean/data/haarcascades/haarcascade_frontalface_default.xml";
+    std::string cascade_path = "haarcascade_frontalface_default.xml"; 
+
     if (!face_cascade.load(cascade_path)) {
-        std::cerr << "Error loading: " << std::endl;
+        std::cerr << "Error loading cascade file: " << cascade_path << std::endl;
+        std::cerr << "Ensure the file exists next to the executable." << std::endl;
         return 1;
     }
-    std::cout << "Face cascade loaded successfully" << std::endl;
+    std::cout << "Face cascade loaded successfully from: " << cascade_path << std::endl;
 
     std::cout << "Image loaded successfully: " << image_path << std::endl;
     std::cout << "Image size: " << image.cols << "x" << image.rows << std::endl;
