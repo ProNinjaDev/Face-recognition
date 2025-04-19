@@ -15,6 +15,6 @@ private:
     bool loaded = false; // Флаг для проверки, успешно ли загружен каскад
     double max_dimension = 1000.0;
     double detection_scale_factor = 1.1;
-    int min_neighbors = 6;
+    int min_neighbors = 6; // Посмотреть, возможно, нужно увеличить
     cv::Size min_face_size = cv::Size(30, 30);
 }; 

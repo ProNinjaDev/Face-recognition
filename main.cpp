@@ -48,7 +48,8 @@ int main(int argc, char* argv[]) {
         cv::rectangle(processed_image, face, cv::Scalar(0, 0, 255), 2);
     }
 
-    cv::imshow("Detected Faces", processed_image);
+
+    // cv::imshow("Detected Faces", processed_image);
 
     std::string output_filename;
     if (argc > 2) {
@@ -79,9 +80,11 @@ int main(int argc, char* argv[]) {
          std::cout << "Result saved successfully" << std::endl;
     }
 
+    /*
     std::cout << "Press any key to exit" << std::endl;
     cv::waitKey(0);
     cv::destroyAllWindows();
+    */
 
     return 0;
 } 
