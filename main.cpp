@@ -7,21 +7,31 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/objdetect.hpp>
+#include <filesystem>
 
-int main() {
-    std::cout << "Hello, OpenCV!" << std::endl;
+int main(int argc, char* argv[]) {
     std::cout << "OpenCV version: " << CV_VERSION << std::endl;
 
-    std::string image_path = "pfJbYwBxPb0.jpg";
+    if (argc < 2) {
+        std::cerr << "Usage: " << (argc > 0 ? argv[0] : "face_recognition_app")
+                  << " <input_image_path> [output_image_path]" << std::endl;
+        std::cerr << "  <input_image_path> : Path to the image file." << std::endl;
+        std::cerr << "  [output_image_path]: Optional. Path to save the result."
+                  << " Defaults to <input_image_name>_detected.<ext>" << std::endl;
+        return 1;
+    }
+
+    std::string image_path = argv[1];
+
     cv::Mat image = cv::imread(image_path);
 
     if (image.empty()) {
-        std::cout << "Could not read the image: " << image_path << std::endl;
+        std::cerr << "Could not read the image: " << image_path << std::endl;
         return 1;
     }
 
     cv::CascadeClassifier face_cascade;
-    std::string cascade_path = "haarcascade_frontalface_default.xml"; 
+    std::string cascade_path = "haarcascade_frontalface_default.xml";
 
     if (!face_cascade.load(cascade_path)) {
         std::cerr << "Error loading cascade file: " << cascade_path << std::endl;
@@ -56,14 +66,42 @@ int main() {
 
     std::cout << "Detect faces: " << faces.size() << std::endl;
 
+    if (faces.empty()) {
+        std::cerr << "No faces detected in the image" << std::endl;
+    }
+
     for (auto& face : faces) {
         cv::rectangle(resized_image, face, cv::Scalar(0, 0, 255), 2);
     }
 
     cv::imshow("Image", resized_image);
 
-    std::string output_filename = "my_image.jpg";
-    cv::imwrite(output_filename, resized_image);
+    std::string output_filename;
+    if (argc > 2) {
+        output_filename = argv[2];
+    } else {
+        try {
+            std::filesystem::path input_p(image_path);
+            std::string stem = input_p.stem().string();
+            std::string ext = input_p.extension().string();
+            output_filename = stem + "_detected" + ext;
+            if (ext.empty()) {
+                output_filename += ".jpg";
+            }
+            if (input_p.has_parent_path()) {
+                output_filename = (input_p.parent_path() / output_filename).string();
+            }
+
+        } catch (const std::filesystem::filesystem_error& e) {
+            std::cerr << "Could not parse input path correctly" << std::endl;
+            output_filename = "output_detected.jpg";
+        }
+    }
+    std::cout << "Saving result to: " << output_filename << std::endl;
+
+    if (!cv::imwrite(output_filename, resized_image)) {
+         std::cerr << "Could not save the image to: " << output_filename << std::endl;
+    }
 
     cv::waitKey(0);
     cv::destroyAllWindows();
