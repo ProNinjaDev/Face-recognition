@@ -6,6 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/objdetect.hpp>
 
 int main() {
     std::cout << "Hello, OpenCV!" << std::endl;
@@ -19,10 +20,18 @@ int main() {
         return 1;
     }
 
+    cv::CascadeClassifier face_cascade;
+    std::string cascade_path = "C:/Users/Anton/vcpkg/buildtrees/opencv4/src/4.11.0-46ecfbc8ae.clean/data/haarcascades/haarcascade_frontalface_default.xml";
+    if (!face_cascade.load(cascade_path)) {
+        std::cerr << "Error loading: " << std::endl;
+        return 1;
+    }
+    std::cout << "Face cascade loaded successfully" << std::endl;
+
     std::cout << "Image loaded successfully: " << image_path << std::endl;
     std::cout << "Image size: " << image.cols << "x" << image.rows << std::endl;
 
-    const double max_dimension = 1000.0; // Максимальная ширина или высота
+    const double max_dimension = 1000.0;
     double scale = 1.0;
 
     if (image.cols > max_dimension || image.rows > max_dimension) {
@@ -34,6 +43,20 @@ int main() {
     cv::resize(image, resized_image, new_size);    
     
     std::cout << "Resized size: " << resized_image.cols << "x" << resized_image.rows << std::endl;
+
+    cv::Mat gray_image;
+    cv::cvtColor(resized_image, gray_image, cv::COLOR_BGR2GRAY);
+    
+    std::vector<cv::Rect> faces;
+    
+    // minNeighbors < 6 ищет на тестовой картинке лишние лица
+    face_cascade.detectMultiScale(gray_image, faces, 1.1, 6, 0, cv::Size(30, 30)); // Не забыть посмотреть другие параметры
+
+    std::cout << "Detect faces: " << faces.size() << std::endl;
+
+    for (auto& face : faces) {
+        cv::rectangle(resized_image, face, cv::Scalar(0, 0, 255), 2);
+    }
 
     cv::imshow("Image", resized_image);
 
